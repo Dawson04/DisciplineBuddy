@@ -106,4 +106,52 @@ async def leaderboard(ctx):
         leaderboard_text += f"{i}. {name} — {user['streak']} days\n"
 
     await ctx.send(leaderboard_text)
+
+@bot.command(name="tradeplan")
+async def tradeplan(ctx):
+    user_id = str(ctx.author.id)
+
+    # Step 1: Start DM Session
+    try:
+        dm_channel = await ctx.author.create_dm()
+        await dm_channel.send("📝 Let's set your trading plan for today. I'll ask you 4 questions.")
+    except:
+        await ctx.send(f"❌ {ctx.author.mention}, I couldn't DM you. Please check your DM settings.")
+        return
+
+    # Step 2: Ask Questions in Sequence
+    questions = [
+        "What setup(s) are you focused on today?",
+        "What’s your max $ risk for the day?",
+        "What’s your max number of trades?",
+        "What’s your discipline focus for the day? (e.g., no revenge trades, no FOMO)"
+    ]
+
+    responses = {}
+
+    # Function to handle replies
+    def check_reply(message):
+        return message.author == ctx.author and isinstance(message.channel, discord.DMChannel)
+
+    for i, question in enumerate(questions, start=1):
+        await dm_channel.send(f"Q{i}: {question}")
+        try:
+            reply = await bot.wait_for("message", check=check_reply, timeout=120)
+            responses[f"Q{i}"] = reply.content
+        except asyncio.TimeoutError:
+            await dm_channel.send("❌ You took too long to reply. Please type `!tradeplan` to start again.")
+            return
+
+    # Step 3: Confirm and Save Responses
+    await dm_channel.send("✅ Got it! Here's your plan for today:")
+    summary = "\n".join([f"**{key}:** {value}" for key, value in responses.items()])
+    await dm_channel.send(summary)
+
+    # Save to the database
+    db.insert({
+        "id": user_id,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "plan": responses
+    })
+    await dm_channel.send("Your plan has been saved. Stay disciplined! 🔥")
 bot.run(TOKEN)
