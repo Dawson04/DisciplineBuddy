@@ -219,6 +219,7 @@ async def send_reflection_prompt():
             user = await bot.fetch_user(int(record["id"]))
             try:
                 from datetime import datetime
+    
     try:
     dm = await user.create_dm()
 
