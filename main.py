@@ -88,12 +88,22 @@ async def streak(ctx):
 
 @bot.command(name="leaderboard")
 async def leaderboard(ctx):
-    top_users = db.find(sort=[("streak", -1)], limit=5)
-    
+    top_users = db.all()
+    if not top_users:
+        await ctx.send("📭 No check-ins yet! Use `!checkin` to start the leaderboard.")
+        return
+
+    # Sort by streak descending
+    sorted_users = sorted(top_users, key=lambda x: x["streak"], reverse=True)[:5]
+
     leaderboard_text = "**🏆 Top 5 Streaks 🏆**\n"
-    for i, user in enumerate(top_users, start=1):
-        member = await ctx.guild.fetch_member(int(user["id"]))
-        leaderboard_text += f"{i}. {member.mention} — {user['streak']} days\n"
-    
+    for i, user in enumerate(sorted_users, start=1):
+        try:
+            member = await ctx.guild.fetch_member(int(user["id"]))
+            name = member.mention
+        except:
+            name = f"User ID {user['id']}"
+        leaderboard_text += f"{i}. {name} — {user['streak']} days\n"
+
     await ctx.send(leaderboard_text)
 bot.run(TOKEN)
