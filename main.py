@@ -2,10 +2,12 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-
+from tinydb import TinyDB, Query
+from datetime import datetime, timedelta
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-
+db = TinyDB("db.json")
+User = Query()
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -18,7 +20,29 @@ async def on_ready():
 
 @bot.command(name="checkin")
 async def checkin(ctx):
-    await ctx.send("✅ Please submit your pre-market trading plan here!")
+    user_id = str(ctx.author.id)
+    today = datetime.utcnow().date()
+
+    user_data = db.get(User.id == user_id)
+
+    if user_data:
+        last_checkin = datetime.strptime(user_data["last_checkin"], "%Y-%m-%d").date()
+        streak = user_data["streak"]
+
+        if today == last_checkin:
+            await ctx.send(f"✅ You already checked in today, {ctx.author.mention}! Your current streak is {streak} 🔥")
+            return
+        elif today == last_checkin + timedelta(days=1):
+            streak += 1
+        else:
+            streak = 1  # Reset streak if not consecutive
+
+        db.update({"last_checkin": str(today), "streak": streak}, User.id == user_id)
+    else:
+        db.insert({"id": user_id, "last_checkin": str(today), "streak": 1})
+        streak = 1
+
+    await ctx.send(f"🧠 Check-in recorded for {ctx.author.mention}! You're on a **{streak}-day streak**! 💪")
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 import pytz
