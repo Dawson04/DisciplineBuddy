@@ -250,8 +250,16 @@ async def on_message(message):
 
 @bot.command()
 async def testreflection(ctx):
-    await send_reflection_prompt()
-    await ctx.send("📬 Reflection questions sent to all members.")
+    try:
+        dm = await ctx.author.create_dm()
+        await dm.send("🧠 What setups are you focusing on today?")
+        await dm.send("💵 What is your max dollar risk for the day?")
+        await dm.send("📊 What is the max number of trades you'll take?")
+        await dm.send("🎯 What is your discipline focus today (e.g., no revenge trades)?")
+        await ctx.send("✅ Reflection questions sent to your DM.")
+    except Exception as e:
+        await ctx.send(f"❌ Failed to send DM: {e}")
+
 
 
 bot.run(TOKEN)
