@@ -154,4 +154,24 @@ async def tradeplan(ctx):
         "plan": responses
     })
     await dm_channel.send("Your plan has been saved. Stay disciplined! 🔥")
+
+@bot.command(name="myplan")
+async def myplan(ctx):
+    user_id = str(ctx.author.id)
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # Find the most recent plan for today
+    plans = db.search((User.id == user_id) & (User.date == today))
+    
+    if not plans:
+        await ctx.send(f"{ctx.author.mention}, you haven’t submitted a trade plan today. Use `!tradeplan` to start.")
+        return
+
+    plan = plans[-1]["plan"]  # Get the most recent one if multiples
+
+    summary = "\n".join([
+        f"**{key}:** {value}"
+        for key, value in plan.items()
+    ])
+    await ctx.send(f"📋 **Your Trading Plan for Today:**\n{summary}")
 bot.run(TOKEN)
