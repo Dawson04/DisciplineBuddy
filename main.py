@@ -19,8 +19,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @tasks.loop(time=time(hour=13, minute=15, tzinfo=timezone.utc))  # 9:15 AM ET
 async def send_reflection_prompt():
-    for member in bot.get_all_members():
-        if not member.bot:
+    for member in ctx.guild.members:
+    if not member.bot:
             try:
                 dm = await member.create_dm()
                 await dm.send("💬 What setups are you focusing on today?")
