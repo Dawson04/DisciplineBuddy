@@ -221,21 +221,21 @@ async def send_reflection_prompt():
                 from datetime import datetime
     
     try:
-    dm = await user.create_dm()
+        dm = await user.create_dm()
 
-    await dm.send("📋 Let’s reflect on your day. Starting with your morning trade plan...")
+        await dm.send("📋 Let’s reflect on your day. Starting with your morning trade plan...")
 
-    await dm.send("1️⃣ Did you stick to the setups you planned to focus on?")
-    q1 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+        await dm.send("1️⃣ Did you stick to the setups you planned to focus on?")
+        q1 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
 
-    await dm.send("2️⃣ Did you stay within your max dollar risk for the day?")
-    q2 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+        await dm.send("2️⃣ Did you stay within your max dollar risk for the day?")
+        q2 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
 
-    await dm.send("3️⃣ Did you follow your max number of trades?")
-    q3 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+        await dm.send("3️⃣ Did you follow your max number of trades?")
+        q3 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
 
-    await dm.send("4️⃣ Did you stick to your discipline focus (e.g., no revenge trades, no FOMO)?")
-    q4 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+        await dm.send("4️⃣ Did you stick to your discipline focus (e.g., no revenge trades, no FOMO)?")
+        q4 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
 
 
         await dm.send("🔁 What’s one thing you’ll improve tomorrow?")
