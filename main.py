@@ -243,7 +243,7 @@ async def on_message(message):
 @bot.command(name="testreflection")
 async def test_reflection(ctx):
     await send_reflection_prompt()
-
+    await ctx.send("🧠 Reflection questions sent to all members.")
 
 
 bot.run(TOKEN)
