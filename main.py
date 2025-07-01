@@ -219,8 +219,7 @@ async def send_reflection_prompt():
             user = await bot.fetch_user(int(record["id"]))
             try:
                 from datetime import datetime
-                
-    try:
+                try:
     dm = await user.create_dm()
 
     await dm.send("📋 Let's reflect on your day. Starting with your morning trade plan...")
