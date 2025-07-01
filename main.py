@@ -18,17 +18,17 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @tasks.loop(time=time(hour=13, minute=15, tzinfo=timezone.utc))  # 9:15 AM ET
 async def send_reflection_prompt():
-    await send_reflection_dm_to_all()
-for member in bot.get_all_members():
+    for member in bot.get_all_members():
         if not member.bot:
             try:
                 dm = await member.create_dm()
-                await dm.send("🧠 What setups are you focusing on today?")
+                await dm.send("💬 What setups are you focusing on today?")
                 await dm.send("💵 What is your max dollar risk for the day?")
-                await dm.send("📊 What is the max number of trades you'll take?")
-                await dm.send("🧘 What is your discipline focus today (e.g., no revenge trades)?")
+                await dm.send("📈 What is the max number of trades you'll take?")
+                await dm.send("🧠 What is your discipline focus today (e.g., no revenge trades)?")
             except Exception as e:
                 print(f"Failed to DM {member}: {e}")
+
 
 
 @bot.event
