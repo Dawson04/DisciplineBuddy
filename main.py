@@ -242,6 +242,7 @@ async def send_reflection_prompt():
 
                 await dm.send("✅ Thanks for completing your end-of-day reflection. Your discipline is your edge.")
 
+    try:
     db.insert({
         "type": "reflection",
         "user_id": str(user.id),
@@ -254,12 +255,11 @@ async def send_reflection_prompt():
             "improvement_goal": q5.content
         }
     })
-    print(f"✅ Reflection saved for {user.name}")  # This line must be indented inside the try
-
-
+    print(f"✅ Reflection saved for {user.name}")  # ✅ NOW it's inside the try block
 
 except Exception as e:
     print(f"❌ Failed reflection for {user.name}: {e}")
+
 
 
 @bot.event
