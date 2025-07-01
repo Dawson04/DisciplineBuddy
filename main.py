@@ -257,7 +257,7 @@ async def send_reflection_prompt():
                 print(f"✅ Reflection saved for {user.name}")  # ✅ NOW it's inside the try block
 
             except Exception as e:
-            print(f"❌ Failed reflection for {user.name}: {e}")
+                print(f"❌ Failed reflection for {user.name}: {e}")
 
 
 
