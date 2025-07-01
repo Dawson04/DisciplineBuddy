@@ -283,11 +283,9 @@ async def on_message(message):
 
 
 
-@bot.command()
-async def testreflection(ctx):
+@bot.event
+async def on_ready():
     await send_reflection_prompt()
-    await ctx.send("✅ Reflection prompts triggered.")
-
 
 
 
