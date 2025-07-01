@@ -242,16 +242,16 @@ async def send_reflection_prompt():
 
                 await dm.send("✅ Thanks for completing your end-of-day reflection. Your discipline is your edge.")
 
-    db.insert({
-        "type": "reflection",
-        "user_id": str(user.id),
-        "date": datetime.utcnow().strftime("%Y-%m-%d"),
-        "answers": {
-            "followed_setups": q1.content,
-            "stayed_in_risk": q2.content,
-            "respected_trade_limit": q3.content,
-            "stayed_disciplined": q4.content,
-            "improvement_goal": q5.content
+                db.insert({
+                        "type": "reflection",
+                        "user_id": str(user.id),
+                        "date": datetime.utcnow().strftime("%Y-%m-%d"),
+                        "answers": {
+                                "followed_setups": q1.content,
+                                "stayed_in_risk": q2.content,
+                                "respected_trade_limit": q3.content,
+                                "stayed_disciplined": q4.content,
+                                "improvement_goal": q5.content
         }
     })
 
