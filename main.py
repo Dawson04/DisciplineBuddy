@@ -4,6 +4,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from tinydb import TinyDB, Query
 from datetime import datetime, timedelta
+from discord.ext import tasks
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 db = TinyDB("db.json")
@@ -18,6 +19,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"Bot connected as {bot.user}")
+
+@bot.event
+async def on_ready():
+    send_reflection_prompt.start()
+    print(f"📗 Bot connected as {bot.user}")
+
 
 @bot.command(name="checkin")
 async def checkin(ctx):
@@ -174,4 +181,52 @@ async def myplan(ctx):
         for key, value in plan.items()
     ])
     await ctx.send(f"📋 **Your Trading Plan for Today:**\n{summary}")
+
+@tasks.loop(seconds=60)  # For testing — runs every 60 seconds
+async def send_reflection_prompt():
+    now = datetime.utcnow()
+    today = now.strftime("%Y-%m-%d")
+
+    # Skip weekends
+    if now.weekday() >= 5:
+        return
+
+    # Only send at a specific minute (adjust as needed)
+    if now.minute % 2 == 0:  # Sends every 2 minutes (for testing)
+        sent = 0
+        plans_today = db.search(User.date == today)
+        for record in plans_today:
+            user = await bot.fetch_user(int(record["id"]))
+            try:
+                await user.send(
+                    "🕓 Market's closed!\nDid you follow your plan today?\n"
+                    "What did you do well, and what could you improve?"
+                )
+                sent += 1
+            except:
+                pass
+
+        print(f"✅ Sent {sent} reflection prompts.")
+
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+
+    if isinstance(message.channel, discord.DMChannel) and not message.author.bot:
+        user_id = str(message.author.id)
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        # Check if user submitted a plan today
+        matches = db.search((User.id == user_id) & (User.date == today))
+        if matches and "reflection" not in matches[-1]:
+            # Save the reflection
+            updated = matches[-1]
+            updated["reflection"] = message.content
+
+            db.remove((User.id == user_id) & (User.date == today))
+            db.insert(updated)
+
+            await message.channel.send("✅ Reflection saved. Good job staying accountable.")
+
+
 bot.run(TOKEN)
