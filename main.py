@@ -22,18 +22,22 @@ from discord.ext import tasks
 
 @tasks.loop(time=time(hour=13, minute=15, tzinfo=timezone.utc))  # 9:15 AM ET
 async def send_reflection_prompt():
+    print("🔁 Task started: attempting to send reflection prompts.")
     for guild in bot.guilds:
+        print(f"📡 Checking guild: {guild.name} ({guild.id})")
         for member in guild.members:
+            print(f"👤 Found member: {member.name} ({member.id}) | Bot: {member.bot}")
             if not member.bot:
                 try:
                     dm = await member.create_dm()
+                    print(f"📬 DM created for {member.name}")
                     await dm.send("🧠 What setups are you focusing on today?")
                     await dm.send("💵 What is your max dollar risk for the day?")
                     await dm.send("📝 What is the max number of trades you'll take?")
                     await dm.send("🎯 What is your discipline focus today (e.g., no revenge trades)?")
+                    print(f"✅ Sent prompts to {member.name}")
                 except Exception as e:
-                    print(f"Failed to DM {member}: {e}")
-
+                    print(f"❌ Failed to DM {member.name}: {e}")
 
 
 @bot.event
