@@ -9,6 +9,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 db = TinyDB("db.json")
 User = Query()
 intents = discord.Intents.default()
+intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -83,5 +84,16 @@ async def streak(ctx):
         current_streak = user_data["streak"]
         await ctx.send(f"📊 {ctx.author.mention}, your current streak is **{current_streak}** days! 🔥")
     else:
-        await ctx.send(f"{ctx.author.mention}, you haven't started a streak yet. Use `!checkin` to begin!")        
+        await ctx.send(f"{ctx.author.mention}, you haven't started a streak yet. Use `!checkin` to begin!")
+
+@bot.command(name="leaderboard")
+async def leaderboard(ctx):
+    top_users = db.find(sort=[("streak", -1)], limit=5)
+    
+    leaderboard_text = "**🏆 Top 5 Streaks 🏆**\n"
+    for i, user in enumerate(top_users, start=1):
+        member = await ctx.guild.fetch_member(int(user["id"]))
+        leaderboard_text += f"{i}. {member.mention} — {user['streak']} days\n"
+    
+    await ctx.send(leaderboard_text)
 bot.run(TOKEN)
