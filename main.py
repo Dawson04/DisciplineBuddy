@@ -74,14 +74,14 @@ async def send_checkin_reminder(channel_id):
     if channel:
         await channel.send("🛎️ Pre-market check-in time! Reply with your plan. Stay disciplined!")
         
-        @bot.command(name="streak")
-        async def streak(ctx):
+@bot.command(name="streak")
+async def streak(ctx):
     user_id = str(ctx.author.id)
     user_data = db.get(User.id == user_id)
 
     if user_data:
-        streak = user_data["streak"]
-        await ctx.send(f"🔥 {ctx.author.mention}, your current streak is **{streak} days**!")
+        current_streak = user_data["streak"]
+        await ctx.send(f"📊 {ctx.author.mention}, your current streak is **{current_streak}** days! 🔥")
     else:
-        await ctx.send(f"🕳️ {ctx.author.mention}, you haven’t checked in yet. Use `!checkin` to start your streak!")
+        await ctx.send(f"{ctx.author.mention}, you haven't started a streak yet. Use `!checkin` to begin!")        
 bot.run(TOKEN)
