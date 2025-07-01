@@ -295,6 +295,12 @@ async def testreflection(ctx):
     except Exception as e:
         await ctx.send(f"❌ Failed to send DM: {e}")
 
+@bot.command()
+async def testreflection(ctx):
+    await send_reflection_prompt()
+    await ctx.send("✅ Reflection prompts triggered.")
+
+
 
 
 bot.run(TOKEN)
