@@ -16,9 +16,10 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-@tasks.loop(time=datetime.time(hour=13, minute=15, tzinfo=datetime.timezone.utc))  # 9:15 AM ET
+@tasks.loop(time=time(hour=13, minute=15, tzinfo=timezone.utc))  # 9:15 AM ET
 async def send_reflection_prompt():
-    for member in bot.get_all_members():
+    await send_reflection_dm_to_all()
+for member in bot.get_all_members():
         if not member.bot:
             try:
                 dm = await member.create_dm()
