@@ -219,7 +219,7 @@ async def send_reflection_prompt():
             user = await bot.fetch_user(int(record["id"]))
             try:
                 from datetime import datetime
-                try:
+try:
     dm = await user.create_dm()
 
     await dm.send("📋 Let's reflect on your day. Starting with your morning trade plan...")
@@ -241,7 +241,6 @@ async def send_reflection_prompt():
 
     await dm.send("✅ Thanks for completing your end-of-day reflection. Your discipline is your edge.")
 
-    # Save to TinyDB
     db.insert({
         "type": "reflection",
         "user_id": str(user.id),
@@ -256,6 +255,7 @@ async def send_reflection_prompt():
     })
 
     print(f"Reflection saved for {user.name}")
+
 
 except Exception as e:
     print(f"❌ Failed reflection for {user.name}: {e}")
