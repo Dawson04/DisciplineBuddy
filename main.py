@@ -228,5 +228,10 @@ async def on_message(message):
 
             await message.channel.send("✅ Reflection saved. Good job staying accountable.")
 
+@bot.command(name="testreflection")
+async def test_reflection(ctx):
+    await send_reflection_prompt()
+
+
 
 bot.run(TOKEN)
