@@ -17,6 +17,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
+from datetime import time, timezone
+from discord.ext import tasks
+
 @tasks.loop(time=time(hour=13, minute=15, tzinfo=timezone.utc))  # 9:15 AM ET
 async def send_reflection_prompt():
     for guild in bot.guilds:
@@ -33,11 +36,10 @@ async def send_reflection_prompt():
 
 
 
-
 @bot.event
 async def on_ready():
     send_reflection_prompt.start()
-    print(f"📗 Bot connected as {bot.user}")
+    print(f"✅ Bot connected as {bot.user}")
 
 
 @bot.command(name="checkin")
@@ -242,10 +244,10 @@ async def on_message(message):
 
             await message.channel.send("✅ Reflection saved. Good job staying accountable.")
 
-@bot.command(name="testreflection")
-async def test_reflection(ctx):
+@bot.command()
+async def testreflection(ctx):
     await send_reflection_prompt()
-    await ctx.send("🧠 Reflection questions sent to all members.")
+    await ctx.send("📬 Reflection questions sent to all members.")
 
 
 bot.run(TOKEN)
