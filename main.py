@@ -283,9 +283,51 @@ async def on_message(message):
 
 
 
-@bot.event
-async def on_ready():
-    await send_reflection_prompt()
+@bot.command()
+async def testreflectionpm(ctx):
+    user = ctx.author
+    now = datetime.utcnow()
+    today = now.strftime("%Y-%m-%d")
+
+    try:
+        dm = await user.create_dm()
+        await dm.send("📅 Let’s reflect on your day. Starting with your morning trade plan...")
+
+        await dm.send("🧠1 Did you stick to the setups you planned to focus on?")
+        q1 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+
+        await dm.send("💵2 Did you stay within your max dollar risk for the day?")
+        q2 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+
+        await dm.send("📊3 Did you follow your max number of trades?")
+        q3 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+
+        await dm.send("🎯4 Did you stick to your discipline focus (e.g., no revenge trades, no FOMO)?")
+        q4 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+
+        await dm.send("🔁5 What’s one thing you’ll improve tomorrow?")
+        q5 = await bot.wait_for('message', check=lambda m: m.author.id == user.id and isinstance(m.channel, discord.DMChannel), timeout=300)
+
+        await dm.send("✅ Thanks for completing your end-of-day reflection. Your discipline is your edge.")
+
+        db.insert({
+            "type": "reflection",
+            "user_id": str(user.id),
+            "date": today,
+            "answers": {
+                "followed_setups": q1.content,
+                "stayed_in_risk": q2.content,
+                "respected_trade_limit": q3.content,
+                "stayed_disciplined": q4.content,
+                "improvement_goal": q5.content
+            }
+        })
+
+        print(f"✅ Reflection saved for {user.name}")
+
+    except Exception as e:
+        print(f"❌ Failed reflection for {user.name}: {e}")
+
 
 
 
