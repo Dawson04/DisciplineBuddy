@@ -242,7 +242,6 @@ async def send_reflection_prompt():
 
                 await dm.send("✅ Thanks for completing your end-of-day reflection. Your discipline is your edge.")
 
-    try:
     db.insert({
         "type": "reflection",
         "user_id": str(user.id),
