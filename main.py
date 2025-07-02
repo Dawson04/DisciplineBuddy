@@ -6,6 +6,11 @@ from tinydb import TinyDB, Query
 from datetime import datetime, timedelta
 from discord.ext import tasks
 from datetime import time, timezone
+import random
+from datetime import datetime
+import pytz
+from discord.ext import tasks
+from tinydb import Query
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 db = TinyDB("db.json")
@@ -15,7 +20,7 @@ intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-
+User = Query()
 
 from datetime import time, timezone
 from discord.ext import tasks
@@ -79,6 +84,7 @@ scheduler = AsyncIOScheduler()
 
 @bot.event
 async def on_ready():
+    run_pairings.start()
     print(f"✅ Bot connected as {bot.user}")
 
     channel_id = YOUR_CHANNEL_ID  # 1389469819472056345
@@ -358,8 +364,58 @@ async def myreflections(ctx):
 
     await ctx.send(response)
 
+@bot.command(name="pairme")
+async def pairme(ctx):
+    user_id = str(ctx.author.id)
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    
+    existing = db.search((User.type == "pairing_optin") & (User.user_id == user_id) & (User.date == today))
+    if existing:
+        await ctx.send(f"🟡 You’re already on today’s list, {ctx.author.mention}.")
+        return
 
+    db.insert({
+        "type": "pairing_optin",
+        "user_id": user_id,
+        "date": today
+    })
+    await ctx.send(f"✅ You’ve been added to today’s pairing list, {ctx.author.mention}.")
 
+@bot.command(name="testpairing")
+async def testpairing(ctx):
+    await pair_traders()
+    await ctx.send("🔁 Test pairing triggered.")
+
+@tasks.loop(minutes=1)
+async def run_pairings():
+    now = datetime.now(pytz.timezone("US/Eastern"))
+    if now.hour == 9 and now.minute == 15 and now.weekday() < 5:
+        await pair_traders()
+
+async def pair_traders():
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    optins = db.search((User.type == "pairing_optin") & (User.date == today))
+    
+    if len(optins) < 2:
+        return
+
+    random.shuffle(optins)
+    pairs = [optins[i:i+2] for i in range(0, len(optins), 2)]
+
+    for pair in pairs:
+        if len(pair) == 2:
+            user1 = await bot.fetch_user(int(pair[0]["user_id"]))
+            user2 = await bot.fetch_user(int(pair[1]["user_id"]))
+
+            msg = (
+                f"👥 You’ve been paired for accountability today!\n"
+                f"Check in and help each other stick to your trading plans. 💪"
+            )
+            await user1.send(f"{msg}\nYour partner: {user2.mention}")
+            await user2.send(f"{msg}\nYour partner: {user1.mention}")
+        else:
+            user = await bot.fetch_user(int(pair[0]["user_id"]))
+            await user.send("👤 No partner today (odd number of traders). Try again tomorrow!")
 
 
 
