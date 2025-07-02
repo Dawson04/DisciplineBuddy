@@ -54,7 +54,7 @@ async def checkin(ctx):
     user_data = db.get(User.id == user_id)
 
     if user_data:
-        last_checkin = datetime.strptime(user_data["last_checkin"], "%Y-%m-%d").date()
+        last_checkin = datetime.strptime(user_data.get("last_checkin"), "%Y-%m-%d").date()
         streak = user_data["streak"]
 
         if today == last_checkin:
