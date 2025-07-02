@@ -130,7 +130,9 @@ async def leaderboard(ctx):
             name = member.mention
         except:
             name = f"User ID {user['id']}"
-        leaderboard_text += f"{i}. {name} — {user['streak']} days\n"
+        streak = user.get("streak", 0)
+        leaderboard_text += f"{i}. {name} – {streak} days\n"
+
 
     await ctx.send(leaderboard_text)
 
