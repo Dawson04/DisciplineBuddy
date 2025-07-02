@@ -330,6 +330,44 @@ async def testreflectionpm(ctx):
     except Exception as e:
         print(f"❌ Failed reflection for {user.name}: {e}")
 
+@bot.command(name="myreflections")
+async def myreflections(ctx):
+    user = ctx.author
+    user_id = str(user.id)
+
+    reflections = db.search(
+        (Reflection.type == "reflection") & (Reflection.user_id == user_id)
+    )
+
+    if not reflections:
+        await ctx.send("🔍 You haven't submitted any reflections yet.")
+        return
+
+    # Sort reflections by date (descending)
+    sorted_reflections = sorted(
+        reflections, key=lambda x: x.get("date", ""), reverse=True
+    )
+
+    # Show up to the last 3 reflections
+    recent_reflections = sorted_reflections[:3]
+
+    dm = await user.create_dm()
+    await dm.send("🧠 Here are your recent reflections:\n")
+
+    for reflection in recent_reflections:
+        date = reflection.get("date", "Unknown Date")
+        answers = reflection.get("answers", {})
+        response = (
+            f"📅 **{date}**\n"
+            f"• ✅ Followed setups: {answers.get('followed_setups', 'N/A')}\n"
+            f"• 💰 Stayed in risk: {answers.get('stayed_in_risk', 'N/A')}\n"
+            f"• 📊 Respected trade limit: {answers.get('respected_trade_limit', 'N/A')}\n"
+            f"• 🧠 Stayed disciplined: {answers.get('stayed_disciplined', 'N/A')}\n"
+            f"• 📈 Improvement goal: {answers.get('improvement_goal', 'N/A')}\n"
+        )
+        await dm.send(response)
+
+
 
 
 
