@@ -292,7 +292,7 @@ async def on_message(message):
 
 
 @bot.command()
-async def testreflectionpm(ctx):
+async def reflectionpm(ctx):
     user = ctx.author
     now = datetime.utcnow()
     today = now.strftime("%Y-%m-%d")
