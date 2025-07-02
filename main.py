@@ -429,52 +429,56 @@ async def unpairme(ctx):
     else:
         await ctx.send(f"ℹ️ You weren’t on the pairing list for today, {ctx.author.mention}.")
 
-@bot.command(name='mylog')
+from tinydb import Query
+from datetime import datetime
+
+@bot.command(name="mylog")
 async def mylog(ctx):
     user_id = str(ctx.author.id)
     today = datetime.today().date().isoformat()
+    User = Query()
 
-    if user_id not in user_data or today not in user_data[user_id]:
-        await ctx.author.send("You haven't submitted a trade plan or reflection today.")
+    user_data = db.get(User.user_id == user_id)
+
+    if not user_data:
+        await ctx.send("❌ No data found for you yet. Use `!checkin` to get started.")
         return
 
-    data = user_data[user_id][today]
+    streak = user_data.get("streak", 0)
 
-    embed = discord.Embed(
-        title=f"📊 Your Daily Trading Log — {today}",
-        color=discord.Color.blue()
+    trade_plan = user_data.get("trade_plan", {}).get(today)
+    if not trade_plan:
+        trade_plan = "Not submitted yet."
+
+    reflections = db.search(
+        (User.type == "reflection") & 
+        (User.user_id == user_id) & 
+        (User.date == today)
     )
 
-    # ✅ Streak
-    streak = user_data[user_id].get("streak", 0)
-    embed.add_field(name="✅ Streak", value=f"{streak} days", inline=False)
-
-    # 📝 Trade Plan
-    plan = data.get("trade_plan", {})
-    if plan:
-        trade_plan_text = (
-            f"**Setups:** {plan.get('setups', 'N/A')}\n"
-            f"**Max $ Risk:** {plan.get('max_risk', 'N/A')}\n"
-            f"**Max Trades:** {plan.get('max_trades', 'N/A')}\n"
-            f"**Discipline Focus:** {plan.get('discipline_focus', 'N/A')}"
-        )
-        embed.add_field(name="📋 Trade Plan", value=trade_plan_text, inline=False)
-    else:
-        embed.add_field(name="📋 Trade Plan", value="Not submitted.", inline=False)
-
-    # 🧠 Reflection
-    reflection = data.get("reflection", {})
-    if reflection:
+    if reflections:
+        r = reflections[0]["answers"]
         reflection_text = (
-            f"**Followed Plan?** {reflection.get('followed_plan', 'N/A')}\n"
-            f"**Lesson Learned:** {reflection.get('lesson', 'N/A')}"
+            f"**🧠 Reflection**\n"
+            f"1️⃣ Followed Setups: {r['followed_setups']}\n"
+            f"2️⃣ Stayed in Risk: {r['stayed_in_risk']}\n"
+            f"3️⃣ Trade Limit: {r['respected_trade_limit']}\n"
+            f"4️⃣ Disciplined: {r['stayed_disciplined']}\n"
+            f"5️⃣ Improvement Goal: {r['improvement_goal']}"
         )
-        embed.add_field(name="🧠 Reflection", value=reflection_text, inline=False)
     else:
-        embed.add_field(name="🧠 Reflection", value="Not submitted.", inline=False)
+        reflection_text = "❌ No reflection submitted yet."
 
-    await ctx.author.send(embed=embed)
-    await ctx.send("📬 Your log has been sent via DM.")
+    log_message = (
+        f"**📅 Log for {today}**\n"
+        f"👤 <@{user_id}>\n"
+        f"🔥 **Streak:** {streak} days\n\n"
+        f"📄 **Trade Plan:**\n{trade_plan}\n\n"
+        f"{reflection_text}"
+    )
+
+    await ctx.send(log_message)
+
 
 
 bot.run(TOKEN)
