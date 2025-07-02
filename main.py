@@ -432,7 +432,7 @@ async def unpairme(ctx):
 @bot.command(name='mylog')
 async def mylog(ctx):
     user_id = str(ctx.author.id)
-    today = datetime.datetime.today().date().isoformat()
+    today = datetime.today().date().isoformat()
 
     if user_id not in user_data or today not in user_data[user_id]:
         await ctx.author.send("You haven't submitted a trade plan or reflection today.")
