@@ -429,5 +429,52 @@ async def unpairme(ctx):
     else:
         await ctx.send(f"ℹ️ You weren’t on the pairing list for today, {ctx.author.mention}.")
 
+@bot.command(name='mylog')
+async def mylog(ctx):
+    user_id = str(ctx.author.id)
+    today = datetime.date.today().isoformat()
+
+    if user_id not in user_data or today not in user_data[user_id]:
+        await ctx.author.send("You haven't submitted a trade plan or reflection today.")
+        return
+
+    data = user_data[user_id][today]
+
+    embed = discord.Embed(
+        title=f"📊 Your Daily Trading Log — {today}",
+        color=discord.Color.blue()
+    )
+
+    # ✅ Streak
+    streak = user_data[user_id].get("streak", 0)
+    embed.add_field(name="✅ Streak", value=f"{streak} days", inline=False)
+
+    # 📝 Trade Plan
+    plan = data.get("trade_plan", {})
+    if plan:
+        trade_plan_text = (
+            f"**Setups:** {plan.get('setups', 'N/A')}\n"
+            f"**Max $ Risk:** {plan.get('max_risk', 'N/A')}\n"
+            f"**Max Trades:** {plan.get('max_trades', 'N/A')}\n"
+            f"**Discipline Focus:** {plan.get('discipline_focus', 'N/A')}"
+        )
+        embed.add_field(name="📋 Trade Plan", value=trade_plan_text, inline=False)
+    else:
+        embed.add_field(name="📋 Trade Plan", value="Not submitted.", inline=False)
+
+    # 🧠 Reflection
+    reflection = data.get("reflection", {})
+    if reflection:
+        reflection_text = (
+            f"**Followed Plan?** {reflection.get('followed_plan', 'N/A')}\n"
+            f"**Lesson Learned:** {reflection.get('lesson', 'N/A')}"
+        )
+        embed.add_field(name="🧠 Reflection", value=reflection_text, inline=False)
+    else:
+        embed.add_field(name="🧠 Reflection", value="Not submitted.", inline=False)
+
+    await ctx.author.send(embed=embed)
+    await ctx.send("📬 Your log has been sent via DM.")
+
 
 bot.run(TOKEN)
