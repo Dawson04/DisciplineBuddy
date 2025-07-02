@@ -330,42 +330,34 @@ async def testreflectionpm(ctx):
     except Exception as e:
         print(f"❌ Failed reflection for {user.name}: {e}")
 
+from tinydb import Query
+
 @bot.command(name="myreflections")
 async def myreflections(ctx):
-    user = ctx.author
-    user_id = str(user.id)
+    user_id = str(ctx.author.id)
+    Reflection = Query()  # Define the query object here
 
     reflections = db.search(
         (Reflection.type == "reflection") & (Reflection.user_id == user_id)
     )
 
     if not reflections:
-        await ctx.send("🔍 You haven't submitted any reflections yet.")
+        await ctx.send("🪞 You have no reflections saved yet.")
         return
 
-    # Sort reflections by date (descending)
-    sorted_reflections = sorted(
-        reflections, key=lambda x: x.get("date", ""), reverse=True
-    )
+    response = "**📜 Your Reflections:**\n\n"
+    for reflection in reflections[-5:]:  # Show only the last 5 reflections
+        date = reflection["date"]
+        answers = reflection["answers"]
+        response += f"🗓️ **{date}**\n"
+        response += f"• Followed setups: {answers['followed_setups']}\n"
+        response += f"• Stayed in risk: {answers['stayed_in_risk']}\n"
+        response += f"• Trade limit: {answers['respected_trade_limit']}\n"
+        response += f"• Disciplined: {answers['stayed_disciplined']}\n"
+        response += f"• Goal: {answers['improvement_goal']}\n\n"
 
-    # Show up to the last 3 reflections
-    recent_reflections = sorted_reflections[:3]
+    await ctx.send(response)
 
-    dm = await user.create_dm()
-    await dm.send("🧠 Here are your recent reflections:\n")
-
-    for reflection in recent_reflections:
-        date = reflection.get("date", "Unknown Date")
-        answers = reflection.get("answers", {})
-        response = (
-            f"📅 **{date}**\n"
-            f"• ✅ Followed setups: {answers.get('followed_setups', 'N/A')}\n"
-            f"• 💰 Stayed in risk: {answers.get('stayed_in_risk', 'N/A')}\n"
-            f"• 📊 Respected trade limit: {answers.get('respected_trade_limit', 'N/A')}\n"
-            f"• 🧠 Stayed disciplined: {answers.get('stayed_disciplined', 'N/A')}\n"
-            f"• 📈 Improvement goal: {answers.get('improvement_goal', 'N/A')}\n"
-        )
-        await dm.send(response)
 
 
 
