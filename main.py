@@ -121,7 +121,7 @@ async def leaderboard(ctx):
         return
 
     # Sort by streak descending
-    sorted_users = sorted(top_users, key=lambda x: x("streak", 0), reverse=True)[:5]
+    sorted_users = sorted(top_users, key=lambda x: x.get("streak", 0), reverse=True)[:5]
 
     leaderboard_text = "**🏆 Top 5 Streaks 🏆**\n"
     for i, user in enumerate(sorted_users, start=1):
