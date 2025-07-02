@@ -417,6 +417,17 @@ async def pair_traders():
             user = await bot.fetch_user(int(pair[0]["user_id"]))
             await user.send("👤 No partner today (odd number of traders). Try again tomorrow!")
 
+@bot.command(name="unpairme")
+async def unpairme(ctx):
+    user_id = str(ctx.author.id)
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    
+    removed = db.remove((User.type == "pairing_optin") & (User.user_id == user_id) & (User.date == today))
+    
+    if removed:
+        await ctx.send(f"❌ You’ve been removed from today’s pairing list, {ctx.author.mention}.")
+    else:
+        await ctx.send(f"ℹ️ You weren’t on the pairing list for today, {ctx.author.mention}.")
 
 
 bot.run(TOKEN)
