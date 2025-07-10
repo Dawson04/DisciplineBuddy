@@ -429,63 +429,51 @@ async def unpairme(ctx):
     else:
         await ctx.send(f"ℹ️ You weren’t on the pairing list for today, {ctx.author.mention}.")
 
-from tinydb import Query
 from datetime import datetime
+from tinydb import Query
 
-@bot.command(name="mylog")
+@bot.command()
 async def mylog(ctx):
     user_id = str(ctx.author.id)
-    today = datetime.today().date().isoformat()
-    User = Query()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    user_data = db.get(User.user_id == user_id)
+    # Get streak
+    streak_entry = db.get((Query().type == 'streak') & (Query().user_id == user_id))
+    streak = streak_entry["streak"] if streak_entry else 0
 
-    if not user_data:
-        await ctx.send("❌ No data found for you yet. Use `!checkin` to get started.")
-        return
+    # Get trade plan
+    plan_entry = db.get((Query().type == 'trade_plan') & (Query().user_id == user_id) & (Query().date == today))
+    if plan_entry:
+        trade_plan = plan_entry["content"]
+    else:
+        trade_plan = "❌ Trade plan not submitted yet."
 
-    streak = user_data.get("streak", 0)
-
-    trade_plan_doc = db.get(
-    (User.type == "trade_plan") & 
-    (User.user_id == user_id) & 
-    (User.date == today)
-)
-
-if trade_plan_doc:
-    trade_plan = trade_plan_doc["content"]
-else:
-    trade_plan = "Not submitted yet."
-
-
-    reflections = db.search(
-        (User.type == "reflection") & 
-        (User.user_id == user_id) & 
-        (User.date == today)
-    )
-
-    if reflections:
-        r = reflections[0]["answers"]
+    # Get reflection
+    reflection_entry = db.get((Query().type == 'reflection') & (Query().user_id == user_id) & (Query().date == today))
+    if reflection_entry:
+        answers = reflection_entry["answers"]
         reflection_text = (
             f"**🧠 Reflection**\n"
-            f"1️⃣ Followed Setups: {r['followed_setups']}\n"
-            f"2️⃣ Stayed in Risk: {r['stayed_in_risk']}\n"
-            f"3️⃣ Trade Limit: {r['respected_trade_limit']}\n"
-            f"4️⃣ Disciplined: {r['stayed_disciplined']}\n"
-            f"5️⃣ Improvement Goal: {r['improvement_goal']}"
+            f"🔹 Followed Setups: {answers['followed_setups']}\n"
+            f"🔹 Stayed in Risk: {answers['stayed_in_risk']}\n"
+            f"🔹 Trade Limit: {answers['respected_trade_limit']}\n"
+            f"🔹 Disciplined: {answers['stayed_disciplined']}\n"
+            f"🔹 Improvement Goal: {answers['improvement_goal']}\n"
         )
     else:
         reflection_text = "❌ No reflection submitted yet."
 
+    # Build and send message
     log_message = (
-        f"**📅 Log for {today}**\n"
+        f"**📘 Log for {today}**\n"
         f"👤 <@{user_id}>\n"
         f"🔥 **Streak:** {streak} days\n\n"
-        f"📄 **Trade Plan:**\n{trade_plan}\n\n"
+        f"📋 **Trade Plan:**\n{trade_plan}\n\n"
         f"{reflection_text}"
     )
-    
+
     await ctx.send(log_message)
+
 
 
 bot.run(TOKEN)
