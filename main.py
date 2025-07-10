@@ -446,9 +446,17 @@ async def mylog(ctx):
 
     streak = user_data.get("streak", 0)
 
-    trade_plan = user_data.get("trade_plan", {}).get(today)
-    if not trade_plan:
-        trade_plan = "Not submitted yet."
+    trade_plan_doc = db.get(
+    (User.type == "trade_plan") & 
+    (User.user_id == user_id) & 
+    (User.date == today)
+)
+
+if trade_plan_doc:
+    trade_plan = trade_plan_doc["content"]
+else:
+    trade_plan = "Not submitted yet."
+
 
     reflections = db.search(
         (User.type == "reflection") & 
