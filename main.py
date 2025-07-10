@@ -484,6 +484,7 @@ else:
         f"📄 **Trade Plan:**\n{trade_plan}\n\n"
         f"{reflection_text}"
     )
+    
     await ctx.send(log_message)
 
 
