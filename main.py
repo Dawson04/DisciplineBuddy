@@ -368,8 +368,12 @@ async def myreflections(ctx):
 async def pairme(ctx):
     user_id = str(ctx.author.id)
     today = datetime.utcnow().strftime("%Y-%m-%d")
-    
-    existing = db.search((User.type == "pairing_optin") & (User.user_id == user_id) & (User.date == today))
+
+    existing = db.search(
+        (User.type == "pairing_optin") &
+        (User.user_id == user_id) &
+        (User.date == today)
+    )
     if existing:
         await ctx.send(f"🟡 You’re already on today’s list, {ctx.author.mention}.")
         return
@@ -379,7 +383,13 @@ async def pairme(ctx):
         "user_id": user_id,
         "date": today
     })
+
     await ctx.send(f"✅ You’ve been added to today’s pairing list, {ctx.author.mention}.")
+
+    # ✅ Immediately check for pairing
+    optins = db.search((User.type == "pairing_optin") & (User.date == today))
+    if len(optins) >= 2 and len(optins) % 2 == 0:
+        await pair_traders()
 
 @bot.command(name="testpairing")
 async def testpairing(ctx):
